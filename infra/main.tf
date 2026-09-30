@@ -1,5 +1,6 @@
 terraform {
   required_version = ">= 1.6.0"
+
   required_providers {
     aws = {
       source  = "hashicorp/aws"
@@ -57,7 +58,7 @@ resource "aws_subnet" "public_a" {
   cidr_block              = "10.0.1.0/24"
   availability_zone       = local.az1
   map_public_ip_on_launch = true
-  tags = { Name = "${var.project_name}-public-a", Tier = "public" }
+  tags                    = { Name = "${var.project_name}-public-a", Tier = "public" }
 }
 
 resource "aws_subnet" "public_b" {
@@ -65,43 +66,45 @@ resource "aws_subnet" "public_b" {
   cidr_block              = "10.0.2.0/24"
   availability_zone       = local.az2
   map_public_ip_on_launch = true
-  tags = { Name = "${var.project_name}-public-b", Tier = "public" }
+  tags                    = { Name = "${var.project_name}-public-b", Tier = "public" }
 }
 
 resource "aws_subnet" "application_a" {
   vpc_id            = aws_vpc.main.id
   cidr_block        = "10.0.11.0/24"
   availability_zone = local.az1
-  tags = { Name = "${var.project_name}-application-a", Tier = "application" }
+  tags              = { Name = "${var.project_name}-application-a", Tier = "application" }
 }
 
 resource "aws_subnet" "application_b" {
   vpc_id            = aws_vpc.main.id
   cidr_block        = "10.0.12.0/24"
   availability_zone = local.az2
-  tags = { Name = "${var.project_name}-application-b", Tier = "application" }
+  tags              = { Name = "${var.project_name}-application-b", Tier = "application" }
 }
 
 resource "aws_subnet" "database_a" {
   vpc_id            = aws_vpc.main.id
   cidr_block        = "10.0.21.0/24"
   availability_zone = local.az1
-  tags = { Name = "${var.project_name}-database-a", Tier = "database" }
+  tags              = { Name = "${var.project_name}-database-a", Tier = "database" }
 }
 
 resource "aws_subnet" "database_b" {
   vpc_id            = aws_vpc.main.id
   cidr_block        = "10.0.22.0/24"
   availability_zone = local.az2
-  tags = { Name = "${var.project_name}-database-b", Tier = "database" }
+  tags              = { Name = "${var.project_name}-database-b", Tier = "database" }
 }
 
 resource "aws_route_table" "public" {
   vpc_id = aws_vpc.main.id
+
   route {
     cidr_block = "0.0.0.0/0"
     gateway_id = aws_internet_gateway.main.id
   }
+
   tags = { Name = "${var.project_name}-public-rt" }
 }
 
