@@ -1,0 +1,5 @@
+aws_region  = "ap-south-1"
+project_name = "netflix-style-3-tier"
+db_name     = "appdb"
+db_username = "appuser"
+db_password = "REPLACE_WITH_A_STRONG_PASSWORD"
