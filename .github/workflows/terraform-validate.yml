@@ -2,13 +2,21 @@ name: Terraform Validate
 
 on:
   push:
-    branches: [main, develop]
+    paths:
+      - 'infra/**'
+      - '.github/workflows/terraform-validate.yml'
   pull_request:
-    branches: [main]
+    paths:
+      - 'infra/**'
+      - '.github/workflows/terraform-validate.yml'
 
 jobs:
-  terraform:
+  validate:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: infra
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -17,13 +25,10 @@ jobs:
         uses: hashicorp/setup-terraform@v3
 
       - name: Terraform Format Check
-        working-directory: infra
         run: terraform fmt -check -recursive
 
       - name: Terraform Init
-        working-directory: infra
         run: terraform init -backend=false
 
       - name: Terraform Validate
-        working-directory: infra
         run: terraform validate
