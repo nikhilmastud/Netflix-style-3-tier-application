@@ -111,7 +111,7 @@ EOF
 
   tag_specifications {
     resource_type = "instance"
-    tags = { Name = "${var.project_name}-app" }
+    tags           = { Name = "${var.project_name}-app" }
   }
 }
 
