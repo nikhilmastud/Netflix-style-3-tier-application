@@ -53,7 +53,7 @@ resource "aws_iam_instance_profile" "ec2" {
 resource "aws_launch_template" "app" {
   name_prefix   = "${var.project_name}-"
   image_id      = data.aws_ami.amazon_linux.id
-  instance_type = "t3.micro"
+  instance_type = "t3.small"
 
   iam_instance_profile {
     name = aws_iam_instance_profile.ec2.name
