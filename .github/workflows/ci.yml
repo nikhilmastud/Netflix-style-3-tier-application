@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [main, develop]
+    branches: [main, develop, fix/three-tier-flow]
   pull_request:
-    branches: [main]
+    branches: [main, fix/three-tier-flow]
 
 jobs:
   application:
