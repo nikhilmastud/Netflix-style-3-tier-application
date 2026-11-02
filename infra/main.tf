@@ -69,6 +69,20 @@ resource "aws_subnet" "public_b" {
   tags                    = { Name = "${var.project_name}-public-b", Tier = "public" }
 }
 
+resource "aws_subnet" "web_a" {
+  vpc_id            = aws_vpc.main.id
+  cidr_block        = "10.0.5.0/24"
+  availability_zone = local.az1
+  tags              = { Name = "${var.project_name}-web-a", Tier = "web" }
+}
+
+resource "aws_subnet" "web_b" {
+  vpc_id            = aws_vpc.main.id
+  cidr_block        = "10.0.6.0/24"
+  availability_zone = local.az2
+  tags              = { Name = "${var.project_name}-web-b", Tier = "web" }
+}
+
 resource "aws_subnet" "application_a" {
   vpc_id            = aws_vpc.main.id
   cidr_block        = "10.0.11.0/24"
