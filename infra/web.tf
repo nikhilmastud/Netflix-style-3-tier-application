@@ -1,0 +1,90 @@
+resource "aws_launch_template" "web" {
+  name_prefix   = "${var.project_name}-web-"
+  image_id      = data.aws_ami.amazon_linux.id
+  instance_type = "t3.micro"
+
+  vpc_security_group_ids = [aws_security_group.web.id]
+
+  user_data = base64encode(<<-EOF
+#!/bin/bash
+set -euxo pipefail
+dnf update -y
+dnf install -y nginx
+cat > /usr/share/nginx/html/index.html <<'HTML'
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Netflix Style 3-Tier</title></head>
+<body style="font-family:Arial;background:#141414;color:white;text-align:center;padding:5rem">
+<h1>Netflix Style 3-Tier Application</h1>
+<p>Presentation Tier — Nginx Web Server</p>
+<p id="result">Connecting to application tier...</p>
+<script>
+fetch('/api')
+  .then(response => response.json())
+  .then(data => document.getElementById('result').textContent = data.application + ' | ' + data.status)
+  .catch(() => document.getElementById('result').textContent = 'Application tier unavailable');
+</script>
+</body>
+</html>
+HTML
+
+cat > /etc/nginx/conf.d/app-proxy.conf <<'NGINX'
+server {
+    listen 80 default_server;
+    server_name _;
+    root /usr/share/nginx/html;
+    index index.html;
+
+    location /api/ {
+        proxy_pass http://${aws_lb.internal.dns_name};
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+}
+NGINX
+
+nginx -t
+systemctl enable --now nginx
+EOF
+  )
+
+  tag_specifications {
+    resource_type = "instance"
+    tags           = { Name = "${var.project_name}-web" }
+  }
+}
+
+resource "aws_autoscaling_group" "web" {
+  name                = "${var.project_name}-web-asg"
+  min_size            = 2
+  desired_capacity    = 2
+  max_size            = 4
+  vpc_zone_identifier = [aws_subnet.application_a.id, aws_subnet.application_b.id]
+  health_check_type   = "ELB"
+  target_group_arns   = [aws_lb_target_group.web.arn]
+
+  launch_template {
+    id      = aws_launch_template.web.id
+    version = "$Latest"
+  }
+
+  tag {
+    key                 = "Name"
+    value               = "${var.project_name}-web-asg-instance"
+    propagate_at_launch = true
+  }
+}
+
+resource "aws_autoscaling_policy" "web_cpu" {
+  name                   = "${var.project_name}-web-cpu-target"
+  autoscaling_group_name = aws_autoscaling_group.web.name
+  policy_type            = "TargetTrackingScaling"
+
+  target_tracking_configuration {
+    predefined_metric_specification {
+      predefined_metric_type = "ASGAverageCPUUtilization"
+    }
+    target_value = 60
+  }
+}
