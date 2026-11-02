@@ -51,7 +51,7 @@ resource "aws_route_table" "application_b" {
   vpc_id = aws_vpc.main.id
   route {
     cidr_block     = "0.0.0.0/0"
-    nat_gateway_id = aws_nat_gateway.b.id
+    nat_gateway_id = aws_nat_gateway.a.id
   }
   tags = { Name = "${var.project_name}-application-b-rt" }
 }
@@ -124,28 +124,6 @@ resource "aws_security_group" "web" {
   }
 
   tags = { Name = "${var.project_name}-web-sg" }
-}
-
-resource "aws_security_group" "internal_alb" {
-  name   = "${var.project_name}-internal-alb-sg"
-  vpc_id = aws_vpc.main.id
-
-  ingress {
-    description     = "HTTP only from web tier"
-    from_port       = 80
-    to_port         = 80
-    protocol        = "tcp"
-    security_groups = [aws_security_group.web.id]
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = { Name = "${var.project_name}-internal-alb-sg" }
 }
 
 resource "aws_security_group" "application" {
