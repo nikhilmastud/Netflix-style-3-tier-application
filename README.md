@@ -77,7 +77,7 @@ The Web and Application subnet groups span two Availability Zones. Each Auto Sca
 | Database health | Reported UP |
 | HTTPS | Not configured |
 | Route 53 custom domain | Not configured |
-| Separate API and target-health checks | To be documented after verification |
+| Web ALB target health | Passed — EC2 target healthy |\n| App ALB target health | Passed — EC2 target healthy |\n| `/api/health` | Passed — HTTP 200, status UP |\n| `/api/db-health` | Passed — HTTP 200, database UP |
 
 The application and database status above is based on the browser verification performed during this deployment. It is not a claim of a long-duration load or failover test.
 
