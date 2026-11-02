@@ -1,59 +1,45 @@
-# Netflix-Style 3-Tier AWS Architecture
+# Netflix-Style 3-Tier AWS Architecture — Low-Cost Lab
 
 ## Request flow
 
-Users -> Route 53 (optional custom DNS) -> Public Application Load Balancer -> Web EC2 Auto Scaling Group (Nginx) -> Internal Application Load Balancer -> Application EC2 Auto Scaling Group (Spring Boot) -> Amazon RDS MySQL Multi-AZ.
+Users -> Public Application Load Balancer -> (default route) Nginx Web EC2 -> static frontend.
+Users -> Public Application Load Balancer (/api/* path rule) -> Spring Boot EC2 -> private Amazon RDS MySQL.
 
 ## Network placement
 
-- Public subnets in two Availability Zones: internet-facing ALB and NAT Gateways.
-- Private web subnets in two Availability Zones: Nginx web instances and internal ALB.
-- Private application subnets in two Availability Zones: Spring Boot instances managed by an Auto Scaling Group.
-- Private database subnets in two Availability Zones: Amazon RDS MySQL Multi-AZ.
+- Public subnets in two Availability Zones: internet-facing ALB and one NAT Gateway in AZ A.
+- Private web subnets in two Availability Zones: Nginx EC2 Auto Scaling Group (one baseline instance).
+- Private application subnets in two Availability Zones: Spring Boot EC2 Auto Scaling Group (one baseline instance).
+- Private database subnets in two Availability Zones: Single-AZ Amazon RDS MySQL.
+- Private subnet route tables share the NAT Gateway in AZ A to reduce fixed cost; this introduces a single-AZ egress dependency and cross-AZ data charges for workloads in AZ B.
 
 ## Tier-to-tier security
 
-- Internet -> public ALB: TCP 80 (TCP 443 is allowed by the security group, but HTTPS listener/certificate must be configured separately).
+- Internet -> public ALB: TCP 80 only (HTTP lab endpoint; no TLS certificate configured).
 - Public ALB -> web instances: TCP 80.
-- Web instances -> internal ALB: TCP 80.
-- Internal ALB -> application instances: TCP 8080.
+- Public ALB path rule /api and /api/* -> application instances: TCP 8080.
 - Application instances -> RDS: TCP 3306.
 - RDS is not publicly accessible.
 
-## High availability and scalability
+## Cost and availability trade-offs
 
-- Web and application Auto Scaling Groups span two Availability Zones.
-- Each group has a minimum and desired capacity of two and a maximum of four.
-- ALB target groups use HTTP health checks.
-- Application and web Auto Scaling Groups use CPU target tracking.
-- RDS is configured for Multi-AZ and automated backups.
+- One public ALB; internal ALB removed.
+- One NAT Gateway shared by private subnets.
+- Web and application ASGs each start at one instance and can scale to two across two AZs.
+- RDS is Single-AZ for lab cost control; database failover is not provided.
+- This is a low-cost learning deployment, not the original full HA/production architecture.
 
-## Monitoring and operations
+## Monitoring
 
-- EC2 instances use an IAM instance profile for Systems Manager and Secrets Manager access.
-- CloudWatch integration and alarms still need to be completed and tested.
-- Route 53 custom DNS is optional and requires a registered domain and hosted zone.
+CloudWatch alarms cover web/app CPU, RDS CPU, public ALB 5xx and RDS free storage. No SNS email notifications are configured.
 
 ## Interview explanation
 
-“I designed a highly available three-tier web application on AWS. Users reach an internet-facing Application Load Balancer, which distributes requests to Nginx web servers in private subnets across two Availability Zones. The web tier forwards API requests through an internal load balancer to Spring Boot application instances managed by a separate Auto Scaling Group. The application tier connects to a private Multi-AZ Amazon RDS MySQL database. Security groups restrict traffic between each tier, while health checks and Auto Scaling improve availability and scalability.”
+"I built a cost-optimized three-tier AWS lab. An internet-facing ALB serves the Nginx presentation tier by default and routes /api requests to a private Spring Boot application tier using path-based routing. The application connects to a private Single-AZ RDS MySQL database. Security groups restrict inbound access to the required tier-to-tier ports. EC2 Auto Scaling Groups can scale from one to two instances, while CloudWatch alarms monitor key service metrics. I deliberately traded Multi-AZ database failover and a dedicated internal ALB for lower lab cost."
 
-## Important implementation note
+## Important limitations
 
-This architecture is defined in Terraform. It must pass Terraform formatting, initialization, validation and plan checks, then be deployed and tested in AWS before it can be described as fully implemented or production-ready.
-
-## AWS full forms
-
-- AWS — Amazon Web Services
-- VPC — Virtual Private Cloud
-- AZ — Availability Zone
-- ALB — Application Load Balancer
-- EC2 — Elastic Compute Cloud
-- ASG — Auto Scaling Group
-- RDS — Relational Database Service
-- IAM — Identity and Access Management
-- NAT — Network Address Translation
-- SG — Security Group
-- CI/CD — Continuous Integration / Continuous Delivery
-- IaC — Infrastructure as Code
-- HA — High Availability
+- HTTP only; add ACM and a domain before production use.
+- One NAT Gateway is a single point of egress failure.
+- Single-AZ RDS has no automatic AZ failover.
+- Do not leave NAT Gateway, ALB, RDS or EC2 resources running when the lab is idle.
