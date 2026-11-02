@@ -2,33 +2,47 @@
 
 ## Request flow
 
-Users -> Application Load Balancer -> EC2 Auto Scaling Group -> Amazon RDS MySQL
+Users -> Route 53 (optional custom DNS) -> Public Application Load Balancer -> Web EC2 Auto Scaling Group (Nginx) -> Internal Application Load Balancer -> Application EC2 Auto Scaling Group (Spring Boot) -> Amazon RDS MySQL Multi-AZ.
 
 ## Network placement
 
-- Public subnets in two Availability Zones: Application Load Balancer and NAT Gateways.
-- Private application subnets in two Availability Zones: EC2 instances managed by the Auto Scaling Group.
-- Private database subnets in two Availability Zones: Amazon RDS MySQL.
+- Public subnets in two Availability Zones: internet-facing ALB and NAT Gateways.
+- Private web subnets in two Availability Zones: Nginx web instances and internal ALB.
+- Private application subnets in two Availability Zones: Spring Boot instances managed by an Auto Scaling Group.
+- Private database subnets in two Availability Zones: Amazon RDS MySQL Multi-AZ.
 
-## Why this design
+## Tier-to-tier security
 
-### High Availability
-Multiple Availability Zones reduce dependence on a single Availability Zone. The Auto Scaling Group maintains multiple application instances and the load balancer routes traffic to healthy targets.
+- Internet -> public ALB: TCP 80 (TCP 443 is allowed by the security group, but HTTPS listener/certificate must be configured separately).
+- Public ALB -> web instances: TCP 80.
+- Web instances -> internal ALB: TCP 80.
+- Internal ALB -> application instances: TCP 8080.
+- Application instances -> RDS: TCP 3306.
+- RDS is not publicly accessible.
 
-### Scalability
-The Auto Scaling Group starts with two instances and can scale to four based on average CPU utilization. The Application Load Balancer distributes requests across the instances.
+## High availability and scalability
 
-### Security
-The internet can reach the load balancer. Application instances accept port 8080 only from the load balancer security group. RDS accepts MySQL port 3306 only from the application security group. RDS is not publicly accessible.
+- Web and application Auto Scaling Groups span two Availability Zones.
+- Each group has a minimum and desired capacity of two and a maximum of four.
+- ALB target groups use HTTP health checks.
+- Application and web Auto Scaling Groups use CPU target tracking.
+- RDS is configured for Multi-AZ and automated backups.
 
-### Database
-RDS MySQL is placed in a dedicated database subnet group spanning two Availability Zones and configured for Multi-AZ deployment.
+## Monitoring and operations
+
+- EC2 instances use an IAM instance profile for Systems Manager and Secrets Manager access.
+- CloudWatch integration and alarms still need to be completed and tested.
+- Route 53 custom DNS is optional and requires a registered domain and hosted zone.
 
 ## Interview explanation
 
-“I designed a highly available three-tier web application on AWS. Users access the application through an Application Load Balancer in public subnets. The load balancer distributes requests across EC2 instances managed by an Auto Scaling Group in private application subnets across two Availability Zones. The application communicates with a private Multi-AZ Amazon RDS MySQL database. Security groups restrict communication between each tier, and Auto Scaling provides scalability and replacement of unhealthy instances.”
+“I designed a highly available three-tier web application on AWS. Users reach an internet-facing Application Load Balancer, which distributes requests to Nginx web servers in private subnets across two Availability Zones. The web tier forwards API requests through an internal load balancer to Spring Boot application instances managed by a separate Auto Scaling Group. The application tier connects to a private Multi-AZ Amazon RDS MySQL database. Security groups restrict traffic between each tier, while health checks and Auto Scaling improve availability and scalability.”
 
-## Important AWS full forms
+## Important implementation note
+
+This architecture is defined in Terraform. It must pass Terraform formatting, initialization, validation and plan checks, then be deployed and tested in AWS before it can be described as fully implemented or production-ready.
+
+## AWS full forms
 
 - AWS — Amazon Web Services
 - VPC — Virtual Private Cloud
