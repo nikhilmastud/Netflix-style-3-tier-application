@@ -66,7 +66,7 @@ resource "aws_launch_template" "app" {
 set -euxo pipefail
 
 dnf update -y
-dnf install -y java-17-amazon-corretto maven git jq awscli
+dnf install -y java-17-amazon-corretto maven git jq awscli-2
 
 mkdir -p /opt/netflix-style-app
 cd /opt/netflix-style-app
