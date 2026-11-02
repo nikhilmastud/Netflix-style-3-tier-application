@@ -19,10 +19,23 @@ cat > /usr/share/nginx/html/index.html <<'HTML'
 <p>Presentation Tier — Nginx Web Server</p>
 <p id="result">Connecting to application tier...</p>
 <script>
-fetch('/api')
-  .then(response => response.json())
-  .then(data => document.getElementById('result').textContent = data.application + ' | ' + data.status)
-  .catch(() => document.getElementById('result').textContent = 'Application tier unavailable');
+Promise.all([
+  fetch('/api').then(response => {
+    if (!response.ok) throw new Error('Application API unavailable');
+    return response.json();
+  }),
+  fetch('/api/db-health').then(response => {
+    if (!response.ok) throw new Error('Database unavailable');
+    return response.json();
+  })
+])
+  .then(([app, db]) => {
+    document.getElementById('result').textContent =
+      app.application + ' | App: ' + app.status + ' | Database: ' + db.database;
+  })
+  .catch(() => {
+    document.getElementById('result').textContent = 'Application or database tier unavailable';
+  });
 </script>
 </body>
 </html>
