@@ -1,85 +1,135 @@
 # Netflix-Style 3-Tier Application
 
-A production-oriented three-tier web application architecture built on AWS, based on the reference flow:
+A Terraform-based AWS deployment demonstrating a three-tier application using an Nginx presentation tier, a Spring Boot application tier, and Amazon RDS for MySQL.
 
-**Users → Application Load Balancer → multiple EC2 instances → Amazon RDS**
+## Live deployment proof
 
-The project demonstrates architecture thinking around **high availability, scalability, load balancing, Auto Scaling, networking, and managed databases**.
+**Deployment result:** Terraform apply completed successfully.
 
-## Architecture
+- Terraform result: **52 resources added, 0 changed, 0 destroyed**
+- VPC: vpc-0ae1c2e3b4eb8f990
+- Application Load Balancer: netflix-style-3-tier-public-alb
+- Web Auto Scaling Group: netflix-style-3-tier-web-asg
+- Application Auto Scaling Group: netflix-style-3-tier-asg
+- RDS: MySQL, Multi-AZ enabled
+- Browser verification reported: **App: RUNNING | Database: UP**
 
-```text
+### Live ALB endpoint (temporary)
+
+[Open the deployed application](http://netflix-style-3-tier-public-alb-451539084.ap-south-1.elb.amazonaws.com/)
+
+> The endpoint uses HTTP, not HTTPS. It will stop working after the temporary AWS infrastructure is destroyed. The browser may show a “Not secure” warning because an HTTPS listener and certificate were not configured.
+
+### Deployment screenshot
+
+Save the browser screenshot showing “Netflix Style 3-Tier Application”, “Presentation Tier — Nginx Web Server”, “App: RUNNING”, and “Database: UP” as:
+
+docs/screenshots/application-health-proof.png
+
+Then add it to this README with:
+
+~~~md
+![Application health proof](docs/screenshots/application-health-proof.png)
+~~~
+
+The screenshot itself has not yet been committed to this repository.
+
+## Actual deployed architecture
+
+~~~text
                          USERS
                            |
                            v
-              +------------------------+
-              | Application Load       |
-              | Balancer (ALB)         |
-              +-----------+------------+
-                          |
-                +---------+---------+
-                |                   |
-                v                   v
-             EC2 #1              EC2 #2
-              AZ-1                AZ-2
-                |                   |
-                +---------+---------+
-                          |
-                          v
-                    Amazon RDS
-                     MySQL
-```
+                Internet-facing ALB
+                     HTTP :80
+                    /         \\
+             default path    /api and /api/*
+                  |                |
+                  v                v
+             Web Target       App Target
+             Nginx EC2        Spring Boot EC2
+                  |                |
+             HTML / UI             v
+                              Amazon RDS
+                              MySQL Multi-AZ
+~~~
 
-### Three logical tiers
+**Important routing detail:** The ALB sends normal website requests to the Nginx web target group. Requests matching /api and /api/* are routed directly from the ALB to the application target group. API traffic does **not** pass through Nginx in the current implementation.
 
-1. **Presentation layer** — user-facing application.
-2. **Application layer** — request and business processing on EC2.
-3. **Database layer** — persistent data in Amazon RDS MySQL.
+## AWS resources and design
 
-### AWS concepts
+- Dedicated VPC: 10.20.0.0/16
+- Two Availability Zones
+- Public, Web, Application, and Database subnet tiers
+- Internet Gateway and a single NAT Gateway
+- Internet-facing Application Load Balancer
+- Separate Web and Application EC2 Auto Scaling Groups
+- Nginx presentation tier
+- Spring Boot application tier
+- Amazon RDS for MySQL with Multi-AZ enabled
+- Tier-based Security Groups
+- IAM instance role and Secrets Manager access for the application
+- CloudWatch alarms and Auto Scaling policies
+- Terraform Infrastructure as Code
 
-- Amazon VPC
-- Availability Zones
-- Application Load Balancer
-- Amazon EC2
-- EC2 Auto Scaling Group
-- Amazon RDS for MySQL
-- Security Groups
-- IAM
-- CloudWatch
-- Terraform
+The Web and Application subnet groups span two Availability Zones. Each Auto Scaling Group was configured with desired capacity 1 and maximum capacity 2. The RDS database is configured for Multi-AZ.
 
-## Production-ready goals
+## Verification status
 
-- Multiple EC2 instances across Availability Zones
-- ALB health checks and traffic distribution
-- Auto Scaling for traffic spikes
-- Private database access
-- Tier-based security groups
-- Highly available network design
-- Infrastructure as Code with Terraform
+| Check | Result |
+|---|---|
+| Terraform deployment | Passed — 52 resources created |
+| ALB website access | Passed — page displayed |
+| Nginx presentation tier | Reported working |
+| Application health | Reported RUNNING |
+| Database health | Reported UP |
+| HTTPS | Not configured |
+| Route 53 custom domain | Not configured |
+| Separate API and target-health checks | To be documented after verification |
 
-## Deployment status
+The application and database status above is based on the browser verification performed during this deployment. It is not a claim of a long-duration load or failover test.
 
-**Not deployed yet.** No AWS resources have been created by this repository at this stage.
+## Terraform deployment
 
-Deployment will be performed only after Terraform validation and a final cost/safety review.
+From the infra/ directory:
 
-## Interview explanation
+~~~bash
+terraform init
+terraform plan -out=new-tfplan
+terraform apply "new-tfplan"
+~~~
 
-> I designed a highly available three-tier web application using Application Load Balancer, EC2, RDS, and Auto Scaling Group. The architecture distributes traffic efficiently across multiple EC2 instances running across Availability Zones and maintains application availability during instance failure.
+The successful apply in this deployment reported:
+
+~~~text
+Apply complete! Resources: 52 added, 0 changed, 0 destroyed.
+~~~
+
+## Cleanup and cost control
+
+This was a temporary live deployment for validation and portfolio evidence. After collecting screenshots and completing the remaining checks, destroy only the **new Terraform-managed stack**:
+
+~~~bash
+terraform destroy
+~~~
+
+Review the destroy plan before confirming. Preserve the pre-existing AWS VPC, stopped EC2 instances, EBS volumes, and the earlier database backup snapshot. A final RDS snapshot may remain and incur storage charges. Also check for separately existing resources, such as the older NAT Gateway, which are not managed by this Terraform state.
 
 ## Repository structure
 
-```text
+~~~text
 app/          Spring Boot application
 infra/        Terraform AWS infrastructure
 web/          Presentation assets
 scripts/      Deployment/bootstrap scripts
-docs/         Architecture and interview documentation
+docs/         Architecture and deployment documentation
 .github/      CI workflow
-```
+~~~
 
-## Important
+## Interview explanation
+
+I deployed a three-tier application on AWS using an internet-facing Application Load Balancer, Nginx on EC2 for the presentation tier, a Spring Boot application tier, and Amazon RDS for MySQL with Multi-AZ enabled. Terraform provisions the VPC, subnet tiers, security groups, Auto Scaling Groups, load balancing, IAM permissions, and CloudWatch alarms. The current ALB routes website traffic to Nginx and API paths directly to the application target group.
+
+## Security
 
 Do not commit AWS access keys, passwords, private keys, Terraform state, or other secrets to this repository.
