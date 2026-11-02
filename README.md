@@ -125,3 +125,33 @@ I deployed a three-tier application on AWS using an internet-facing Application 
 ## Security
 
 Do not commit AWS access keys, passwords, private keys, Terraform state, or other secrets to this repository.
+
+## k6 load test results
+
+A controlled baseline load test was executed against the deployed ALB endpoint using Grafana k6.
+
+**Test configuration**
+- Virtual users: 5
+- Duration: 30 seconds
+- Iterations: 130
+- HTTP requests: 390
+- Checks: 780
+
+**Observed results**
+- Request failure rate: **0.00%** (0 failed out of 390 requests)
+- Check success rate: **100.00%** (780/780 checks passed)
+- Average HTTP request duration: **61.92 ms**
+- 95th percentile HTTP request duration: **106.33 ms**
+- Maximum HTTP request duration: **433.20 ms**
+
+The script validates the homepage/Nginx response, application health endpoint, and database health endpoint. These results apply only to this small 5-VU, 30-second test; they do not establish production-scale capacity or sustained availability.
+
+Run from the `infra/` directory:
+
+~~~bash
+k6 run --summary-export=load-test-summary.json load-test.js
+~~~
+
+Evidence files:
+- Test script: [infra/load-test.js](infra/load-test.js)
+- Raw k6 summary: [infra/load-test-summary.json](infra/load-test-summary.json)
