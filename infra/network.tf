@@ -3,23 +3,11 @@ resource "aws_eip" "nat_a" {
   tags   = { Name = "${var.project_name}-nat-a-eip" }
 }
 
-resource "aws_eip" "nat_b" {
-  domain = "vpc"
-  tags   = { Name = "${var.project_name}-nat-b-eip" }
-}
-
 resource "aws_nat_gateway" "a" {
   allocation_id = aws_eip.nat_a.id
   subnet_id     = aws_subnet.public_a.id
   depends_on    = [aws_internet_gateway.main]
   tags          = { Name = "${var.project_name}-nat-a" }
-}
-
-resource "aws_nat_gateway" "b" {
-  allocation_id = aws_eip.nat_b.id
-  subnet_id     = aws_subnet.public_b.id
-  depends_on    = [aws_internet_gateway.main]
-  tags          = { Name = "${var.project_name}-nat-b" }
 }
 
 resource "aws_route_table" "web_a" {
@@ -35,7 +23,7 @@ resource "aws_route_table" "web_b" {
   vpc_id = aws_vpc.main.id
   route {
     cidr_block     = "0.0.0.0/0"
-    nat_gateway_id = aws_nat_gateway.b.id
+    nat_gateway_id = aws_nat_gateway.a.id
   }
   tags = { Name = "${var.project_name}-web-b-rt" }
 }
