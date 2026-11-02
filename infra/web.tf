@@ -60,7 +60,7 @@ resource "aws_autoscaling_group" "web" {
   min_size            = 2
   desired_capacity    = 2
   max_size            = 4
-  vpc_zone_identifier = [aws_subnet.application_a.id, aws_subnet.application_b.id]
+  vpc_zone_identifier = [aws_subnet.web_a.id, aws_subnet.web_b.id]
   health_check_type   = "ELB"
   target_group_arns   = [aws_lb_target_group.web.arn]
 
