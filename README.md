@@ -22,17 +22,9 @@ A Terraform-based AWS deployment demonstrating a three-tier application using an
 
 ### Deployment screenshot
 
-Save the browser screenshot showing “Netflix Style 3-Tier Application”, “Presentation Tier — Nginx Web Server”, “App: RUNNING”, and “Database: UP” as:
+![Application health proof](Screenshot%20(111).png)
 
-docs/screenshots/application-health-proof.png
-
-Then add it to this README with:
-
-~~~md
-![Application health proof](docs/screenshots/application-health-proof.png)
-~~~
-
-The screenshot itself has not yet been committed to this repository.
+The screenshot is committed in the repository root as `Screenshot (111).png`.
 
 ## Actual deployed architecture
 
