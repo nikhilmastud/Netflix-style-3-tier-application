@@ -66,11 +66,11 @@ resource "aws_launch_template" "app" {
 set -euxo pipefail
 
 dnf update -y
-dnf install -y java-17-amazon-corretto maven git jq
+dnf install -y java-17-amazon-corretto maven git jq awscli
 
 mkdir -p /opt/netflix-style-app
 cd /opt/netflix-style-app
-git clone --depth 1 --branch develop https://github.com/nikhilmastud/Netflix-style-3-tier-application.git source
+git clone --depth 1 --branch fix/three-tier-flow https://github.com/nikhilmastud/Netflix-style-3-tier-application.git source
 cd source/app
 mvn -q -DskipTests package
 
