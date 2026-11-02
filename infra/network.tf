@@ -22,6 +22,34 @@ resource "aws_nat_gateway" "b" {
   tags          = { Name = "${var.project_name}-nat-b" }
 }
 
+resource "aws_route_table" "web_a" {
+  vpc_id = aws_vpc.main.id
+  route {
+    cidr_block     = "0.0.0.0/0"
+    nat_gateway_id = aws_nat_gateway.a.id
+  }
+  tags = { Name = "${var.project_name}-web-a-rt" }
+}
+
+resource "aws_route_table" "web_b" {
+  vpc_id = aws_vpc.main.id
+  route {
+    cidr_block     = "0.0.0.0/0"
+    nat_gateway_id = aws_nat_gateway.b.id
+  }
+  tags = { Name = "${var.project_name}-web-b-rt" }
+}
+
+resource "aws_route_table_association" "web_a" {
+  subnet_id      = aws_subnet.web_a.id
+  route_table_id = aws_route_table.web_a.id
+}
+
+resource "aws_route_table_association" "web_b" {
+  subnet_id      = aws_subnet.web_b.id
+  route_table_id = aws_route_table.web_b.id
+}
+
 resource "aws_route_table" "application_a" {
   vpc_id = aws_vpc.main.id
   route {
