@@ -24,23 +24,19 @@ resource "aws_nat_gateway" "b" {
 
 resource "aws_route_table" "application_a" {
   vpc_id = aws_vpc.main.id
-
   route {
     cidr_block     = "0.0.0.0/0"
     nat_gateway_id = aws_nat_gateway.a.id
   }
-
   tags = { Name = "${var.project_name}-application-a-rt" }
 }
 
 resource "aws_route_table" "application_b" {
   vpc_id = aws_vpc.main.id
-
   route {
     cidr_block     = "0.0.0.0/0"
     nat_gateway_id = aws_nat_gateway.b.id
   }
-
   tags = { Name = "${var.project_name}-application-b-rt" }
 }
 
@@ -70,7 +66,7 @@ resource "aws_route_table_association" "database_b" {
 }
 
 resource "aws_security_group" "alb" {
-  name   = "${var.project_name}-alb-sg"
+  name   = "${var.project_name}-public-alb-sg"
   vpc_id = aws_vpc.main.id
 
   ingress {
@@ -96,7 +92,51 @@ resource "aws_security_group" "alb" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  tags = { Name = "${var.project_name}-alb-sg" }
+  tags = { Name = "${var.project_name}-public-alb-sg" }
+}
+
+resource "aws_security_group" "web" {
+  name   = "${var.project_name}-web-sg"
+  vpc_id = aws_vpc.main.id
+
+  ingress {
+    description     = "HTTP only from public ALB"
+    from_port       = 80
+    to_port         = 80
+    protocol        = "tcp"
+    security_groups = [aws_security_group.alb.id]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = { Name = "${var.project_name}-web-sg" }
+}
+
+resource "aws_security_group" "internal_alb" {
+  name   = "${var.project_name}-internal-alb-sg"
+  vpc_id = aws_vpc.main.id
+
+  ingress {
+    description     = "HTTP only from web tier"
+    from_port       = 80
+    to_port         = 80
+    protocol        = "tcp"
+    security_groups = [aws_security_group.web.id]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = { Name = "${var.project_name}-internal-alb-sg" }
 }
 
 resource "aws_security_group" "application" {
@@ -104,11 +144,11 @@ resource "aws_security_group" "application" {
   vpc_id = aws_vpc.main.id
 
   ingress {
-    description     = "Spring Boot only from ALB"
+    description     = "Spring Boot only from internal ALB"
     from_port       = 8080
     to_port         = 8080
     protocol        = "tcp"
-    security_groups = [aws_security_group.alb.id]
+    security_groups = [aws_security_group.internal_alb.id]
   }
 
   egress {
