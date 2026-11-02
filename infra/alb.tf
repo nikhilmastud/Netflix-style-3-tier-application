@@ -66,7 +66,7 @@ resource "aws_lb" "internal" {
   internal           = true
   load_balancer_type = "application"
   security_groups    = [aws_security_group.internal_alb.id]
-  subnets            = [aws_subnet.application_a.id, aws_subnet.application_b.id]
+  subnets            = [aws_subnet.web_a.id, aws_subnet.web_b.id]
 
   tags = { Name = "${var.project_name}-internal-alb" }
 }
