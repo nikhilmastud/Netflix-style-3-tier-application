@@ -153,11 +153,11 @@ resource "aws_security_group" "application" {
   vpc_id = aws_vpc.main.id
 
   ingress {
-    description     = "Spring Boot only from internal ALB"
+    description     = "Spring Boot API only from public ALB"
     from_port       = 8080
     to_port         = 8080
     protocol        = "tcp"
-    security_groups = [aws_security_group.internal_alb.id]
+    security_groups = [aws_security_group.alb.id]
   }
 
   egress {
