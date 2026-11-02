@@ -29,6 +29,22 @@ resource "aws_lb" "public" {
   tags = { Name = "${var.project_name}-public-alb" }
 }
 
+resource "aws_lb_listener_rule" "app_api" {
+  listener_arn = aws_lb_listener.public_http.arn
+  priority     = 10
+
+  action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.app.arn
+  }
+
+  condition {
+    path_pattern {
+      values = ["/api", "/api/*"]
+    }
+  }
+}
+
 resource "aws_lb_listener" "public_http" {
   load_balancer_arn = aws_lb.public.arn
   port              = 80
@@ -61,23 +77,3 @@ resource "aws_lb_target_group" "app" {
   tags = { Name = "${var.project_name}-app-tg" }
 }
 
-resource "aws_lb" "internal" {
-  name               = "${var.project_name}-internal-alb"
-  internal           = true
-  load_balancer_type = "application"
-  security_groups    = [aws_security_group.internal_alb.id]
-  subnets            = [aws_subnet.web_a.id, aws_subnet.web_b.id]
-
-  tags = { Name = "${var.project_name}-internal-alb" }
-}
-
-resource "aws_lb_listener" "internal_http" {
-  load_balancer_arn = aws_lb.internal.arn
-  port              = 80
-  protocol          = "HTTP"
-
-  default_action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.app.arn
-  }
-}
