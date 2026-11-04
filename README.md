@@ -1,10 +1,10 @@
 # Netflix-Style 3-Tier Application
 
-A production-oriented three-tier web application architecture built on AWS, based on the reference flow:
+A production-oriented three-tier web application deployed on AWS, based on the reference flow:
 
-**Users → Application Load Balancer → multiple EC2 instances → Amazon RDS**
+**Users → Application Load Balancer → EC2 Auto Scaling → Amazon RDS**
 
-The project demonstrates architecture thinking around **high availability, scalability, load balancing, Auto Scaling, networking, and managed databases**.
+The project demonstrates **high availability, scalability, load balancing, Auto Scaling, networking, managed databases, and Infrastructure as Code**.
 
 ## Architecture
 
@@ -36,38 +36,26 @@ The project demonstrates architecture thinking around **high availability, scala
 2. **Application layer** — request and business processing on EC2.
 3. **Database layer** — persistent data in Amazon RDS MySQL.
 
-### AWS concepts
+### AWS services and concepts
 
-- Amazon VPC
-- Availability Zones
+- Amazon VPC and public/private subnets
+- Multiple Availability Zones
 - Application Load Balancer
-- Amazon EC2
-- EC2 Auto Scaling Group
+- Amazon EC2 and EC2 Auto Scaling
 - Amazon RDS for MySQL
-- Security Groups
-- IAM
-- CloudWatch
+- Security Groups and IAM
+- Amazon CloudWatch
 - Terraform
 
-## Production-ready goals
+## Deployment and validation
 
-- Multiple EC2 instances across Availability Zones
-- ALB health checks and traffic distribution
-- Auto Scaling for traffic spikes
-- Private database access
-- Tier-based security groups
-- Highly available network design
-- Infrastructure as Code with Terraform
+**AWS deployment completed and verified.**
 
-## Deployment status
-
-**Not deployed yet.** No AWS resources have been created by this repository at this stage.
-
-Deployment will be performed only after Terraform validation and a final cost/safety review.
+The deployed environment and application architecture were validated through deployment checks and load/failure testing. Refer to the project files and test evidence in this repository for implementation details.
 
 ## Interview explanation
 
-> I designed a highly available three-tier web application using Application Load Balancer, EC2, RDS, and Auto Scaling Group. The architecture distributes traffic efficiently across multiple EC2 instances running across Availability Zones and maintains application availability during instance failure.
+> I implemented a three-tier AWS architecture using an Application Load Balancer, EC2 Auto Scaling, and Amazon RDS. The design distributes incoming traffic across application instances in multiple Availability Zones and uses health checks and scaling to support availability and resilience.
 
 ## Repository structure
 
@@ -80,6 +68,6 @@ docs/         Architecture and interview documentation
 .github/      CI workflow
 ```
 
-## Important
+## Security
 
 Do not commit AWS access keys, passwords, private keys, Terraform state, or other secrets to this repository.
