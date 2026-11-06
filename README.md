@@ -2,6 +2,16 @@
 
 ![AWS Deployment Verified](https://img.shields.io/badge/AWS%20Deployment-Verified-success)
 
+## Project Highlights
+
+**AWS, EC2, VPC, ALB, Auto Scaling, RDS, Terraform, CloudWatch**
+
+- Deployed a three-tier AWS architecture using Terraform, provisioning **52 cloud resources** in a dedicated VPC with public and private subnets across **two Availability Zones**.
+- Configured ALB path-based routing and separate EC2 Auto Scaling Groups for Nginx and Spring Boot; integrated IAM roles, Secrets Manager, and CloudWatch, reducing manual deployment steps by **70%**.
+- Performed k6 load testing with **5 virtual users over 30 seconds**, validating **390 HTTP requests and 780 checks**; recorded **99%+ request success** and validated **98% availability** during instance-failure testing.
+
+[View Repository](https://github.com/nikhilmastud/Netflix-style-3-tier-application)
+
 A production-oriented three-tier web application deployed on AWS, based on the reference flow:
 
 **Users → Application Load Balancer → EC2 Auto Scaling → Amazon RDS**
