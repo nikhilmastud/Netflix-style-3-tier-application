@@ -12,11 +12,29 @@
 
 [View Repository](https://github.com/nikhilmastud/Netflix-style-3-tier-application)
 
-A production-oriented three-tier web application deployed on AWS, based on the reference flow:
+## Overview
 
-**Users → Application Load Balancer → EC2 Auto Scaling → Amazon RDS**
+The Netflix-Style 3-Tier Application demonstrates a highly available AWS web architecture using an Application Load Balancer, EC2 Auto Scaling Groups, and Amazon RDS. It separates the presentation, application, and database layers across a VPC with public and private subnets in multiple Availability Zones.
 
-The project demonstrates **high availability, scalability, load balancing, Auto Scaling, networking, managed databases, and Infrastructure as Code**.
+## Live Site
+
+[Open Netflix Application through the Application Load Balancer](http://netflix-style-3-tier-public-alb-451539084.ap-south-1.elb.amazonaws.com/)
+
+[Open the EC2 Nginx Web Server](http://3.110.184.125/)
+
+*These URLs were used during deployment validation. They may no longer be accessible if the AWS instances or load balancer have been stopped or decommissioned.*
+
+## Deployment Status
+
+The application was deployed on AWS and validated through the Application Load Balancer and EC2 web-server endpoint.
+
+The deployment evidence captured during testing showed:
+- The `netflix-web-server` EC2 instance in the **Running** state.
+- **3/3 status checks passed** for the EC2 instance.
+- The EC2 endpoint displayed **“Netflix App is Running Successfully!”**.
+- The ALB endpoint displayed **App: RUNNING** and **Database: UP**.
+
+The project also includes k6 load testing and instance-failure validation results documented in the Project Highlights above.
 
 ## Architecture
 
@@ -58,26 +76,6 @@ The project demonstrates **high availability, scalability, load balancing, Auto 
 - Security Groups and IAM
 - Amazon CloudWatch
 - Terraform
-
-## Deployment Evidence
-
-The following links were captured during the AWS deployment validation:
-
-- [Open the application through the Application Load Balancer](http://netflix-style-3-tier-public-alb-451539084.ap-south-1.elb.amazonaws.com/)
-- [Open the EC2 Nginx web-server endpoint](http://3.110.184.125/)
-
-**Validation observed in the screenshots:**
-- The EC2 instance `netflix-web-server` was in the **Running** state with **3/3 status checks passed**.
-- The application endpoint displayed **“Netflix App is Running Successfully!”**.
-- The ALB endpoint displayed the **Netflix Style 3-Tier Application** page with **App: RUNNING** and **Database: UP**.
-
-These screenshots document the deployment state at the time of testing; the links may stop responding if the AWS infrastructure is stopped or decommissioned.
-
-## Deployment and validation
-
-**AWS deployment completed and verified.**
-
-The deployed environment and application architecture were validated through deployment checks and load/failure testing. Refer to the project files and test evidence in this repository for implementation details.
 
 ## Repository structure
 
