@@ -26,15 +26,28 @@ The Netflix-Style 3-Tier Application demonstrates a highly available AWS web arc
 
 ## Deployment Status
 
-The application was deployed on AWS and validated through the Application Load Balancer and EC2 web-server endpoint.
+The application was deployed on AWS and validated through the Application Load Balancer and EC2 web-server endpoint. The deployment state and test results are documented below.
 
-The deployment evidence captured during testing showed:
-- The `netflix-web-server` EC2 instance in the **Running** state.
-- **3/3 status checks passed** for the EC2 instance.
-- The EC2 endpoint displayed **“Netflix App is Running Successfully!”**.
-- The ALB endpoint displayed **App: RUNNING** and **Database: UP**.
+## Deployment Evidence
 
-The project also includes k6 load testing and instance-failure validation results documented in the Project Highlights above.
+The following links were captured during the AWS deployment validation:
+
+- [Open the application through the Application Load Balancer](http://netflix-style-3-tier-public-alb-451539084.ap-south-1.elb.amazonaws.com/)
+- [Open the EC2 Nginx web-server endpoint](http://3.110.184.125/)
+
+**Validation observed in the screenshots:**
+
+- The EC2 instance `netflix-web-server` was in the **Running** state with **3/3 status checks passed**.
+- The application endpoint displayed **“Netflix App is Running Successfully!”**.
+- The ALB endpoint displayed the **Netflix Style 3-Tier Application** page with **App: RUNNING** and **Database: UP**.
+
+These screenshots document the deployment state at the time of testing; the links may stop responding if the AWS infrastructure is stopped or decommissioned.
+
+## Deployment and validation
+
+**AWS deployment completed and verified.**
+
+The deployed environment and application architecture were validated through deployment checks and load/failure testing. Refer to the project files and test evidence in this repository for implementation details.
 
 ## Architecture
 
