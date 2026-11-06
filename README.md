@@ -1,5 +1,7 @@
 # Netflix-Style 3-Tier Application
 
+![AWS Deployment Verified](https://img.shields.io/badge/AWS%20Deployment-Verified-success)
+
 A production-oriented three-tier web application deployed on AWS, based on the reference flow:
 
 **Users → Application Load Balancer → EC2 Auto Scaling → Amazon RDS**
