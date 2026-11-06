@@ -59,15 +59,25 @@ The project demonstrates **high availability, scalability, load balancing, Auto 
 - Amazon CloudWatch
 - Terraform
 
+## Deployment Evidence
+
+The following links were captured during the AWS deployment validation:
+
+- [Open the application through the Application Load Balancer](http://netflix-style-3-tier-public-alb-451539084.ap-south-1.elb.amazonaws.com/)
+- [Open the EC2 Nginx web-server endpoint](http://3.110.184.125/)
+
+**Validation observed in the screenshots:**
+- The EC2 instance `netflix-web-server` was in the **Running** state with **3/3 status checks passed**.
+- The application endpoint displayed **“Netflix App is Running Successfully!”**.
+- The ALB endpoint displayed the **Netflix Style 3-Tier Application** page with **App: RUNNING** and **Database: UP**.
+
+These screenshots document the deployment state at the time of testing; the links may stop responding if the AWS infrastructure is stopped or decommissioned.
+
 ## Deployment and validation
 
 **AWS deployment completed and verified.**
 
 The deployed environment and application architecture were validated through deployment checks and load/failure testing. Refer to the project files and test evidence in this repository for implementation details.
-
-## Interview explanation
-
-> I implemented a three-tier AWS architecture using an Application Load Balancer, EC2 Auto Scaling, and Amazon RDS. The design distributes incoming traffic across application instances in multiple Availability Zones and uses health checks and scaling to support availability and resilience.
 
 ## Repository structure
 
@@ -76,7 +86,7 @@ app/          Spring Boot application
 infra/        Terraform AWS infrastructure
 web/          Presentation assets
 scripts/      Deployment/bootstrap scripts
-docs/         Architecture and interview documentation
+docs/         Architecture and deployment documentation
 .github/      CI workflow
 ```
 
